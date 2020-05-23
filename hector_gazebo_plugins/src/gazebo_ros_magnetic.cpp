@@ -136,7 +136,7 @@ void GazeboRosMagnetic::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
   }
 
   node_handle_ = new ros::NodeHandle(namespace_);
-  publisher_ = node_handle_->advertise<geometry_msgs::Vector3Stamped>(topic_, 1);
+  publisher_ = node_handle_->advertise<sensor_msgs::MagneticField>(topic_, 1);
 
   // setup dynamic_reconfigure server
   dynamic_reconfigure_server_.reset(new dynamic_reconfigure::Server<SensorModelConfig>(ros::NodeHandle(*node_handle_, topic_)));
@@ -183,7 +183,13 @@ void GazeboRosMagnetic::Update()
   magnetic_field_.vector.z = field.z;
 #endif
 
-  publisher_.publish(magnetic_field_);
+  magnetic_field_msg.header.stamp     = ros::Time(sim_time.sec, sim_time.nsec);
+  magnetic_field_msg.header.frame_id  = frame_id_;
+  magnetic_field_msg.magnetic_field.x = magnetic_field_.vector.x;
+  magnetic_field_msg.magnetic_field.y = magnetic_field_.vector.y;
+  magnetic_field_msg.magnetic_field.z = magnetic_field_.vector.z;
+  
+  publisher_.publish(magnetic_field_msg);
 }
 
 // Register this plugin with the simulator
